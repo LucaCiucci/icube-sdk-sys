@@ -2,7 +2,9 @@ use icube_sdk_sys::ffi;
 
 fn main() {
     unsafe {
-        icube_sdk_sys::load().expect("Failed to load ICubeSDK");
+        if icube_sdk_sys::load() != ffi::IC_SUCCESS as _ {
+            panic!("Failed to load ICubeSDK");
+        }
 
         let num_devices = ffi::ICubeSDK_Init.unwrap()();
 

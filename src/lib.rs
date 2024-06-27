@@ -35,16 +35,16 @@ macro_rules! to_c_str {
     };
 }
 
-pub unsafe fn load() -> Result<(), ()> {
+pub unsafe fn load() -> i32 {
     #[cfg(target_arch = "x86_64")]
     {
         to_c_str!(name = "ICubeSDK64");
-        (ffi::LoadICubeApi(name) != 0).then(|| ()).ok_or(())
+        ffi::LoadICubeApi(name)
     }
     #[cfg(target_arch = "x86")]
     {
         to_c_str!(name = "ICubeSDK");
-        (ffi::LoadICubeApi(name) != 0).then(|| ()).ok_or(())
+        ffi::LoadICubeApi(name)
     }
 }
 

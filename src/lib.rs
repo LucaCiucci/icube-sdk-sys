@@ -1,53 +1,63 @@
-#![doc = include_str!("../README.md")]
-#![cfg(target_os = "windows")]
+mod macros;
 
-pub mod ffi {
-    #![allow(non_upper_case_globals)]
-    #![allow(non_camel_case_types)]
-    #![allow(non_snake_case)]
+pub mod v1;
+pub mod v2;
 
-    include!(concat!(env!("OUT_DIR"), "/NET_ICube_API.h.rs"));
+#[derive(Debug)]
+pub enum SDK {
+    V1(v1::API),
+    V2(v2::API),
 }
 
-/// Convert a string literal to a C string.
-///
-/// # Examples
-/// ```
-/// # use icube_sdk_sys::to_c_str;
-/// to_c_str!(name = "ICubeSDK64");
-///
-/// let name: String = "Hello".into();
-/// to_c_str!(name);
-///
-/// let name: String = "Hello".into();
-/// to_c_str!(renamed_name = name);
-#[macro_export]
-macro_rules! to_c_str {
-    ($name:ident = $e:expr) => {
-        let tmp = std::ffi::CString::new($e).unwrap();
-        let $name = tmp.as_ptr();
-    };
-    ($name:ident) => {
-        $crate::to_c_str!($name = $name);
-    };
-    ($($name:ident $(= $e:expr)?),*) => {
-        $($crate::to_c_str!( $name $(= $e)? );)*
-    };
-}
+pub use libloading;
 
-pub unsafe fn load() -> i32 {
-    #[cfg(target_arch = "x86_64")]
-    {
-        to_c_str!(name = "ICubeSDK64");
-        ffi::LoadICubeApi(name)
-    }
-    #[cfg(target_arch = "x86")]
-    {
-        to_c_str!(name = "ICubeSDK");
-        ffi::LoadICubeApi(name)
+impl SDK {
+    /// Try to load the SDK using [`default_lib_name`].
+    pub unsafe fn load() -> Option<Self> { // TODO exhaustive error handling
+        let lib_name = default_lib_name().ok()?;
+
+        if let Ok(v2) = unsafe { v2::API::new(lib_name) } {
+            if v2.check_version() {
+                return Some(SDK::V2(v2));
+            } else {
+                log::error!("The version of the iCube SDK v2 is wrong");
+            }
+        }
+
+        if let Ok(v1) = unsafe { v1::API::new(lib_name) } {
+            if v1.check_version() {
+                return Some(SDK::V1(v1));
+            } else {
+                log::error!("The version of the iCube SDK v1 (NETUSBCAM) is wrong");
+            }
+        }
+
+        None
     }
 }
 
-pub unsafe fn unload() {
-    ffi::UnloadICubeApi();
+pub fn default_lib_name() -> Result<&'static str, UnsupportedPlatformError> {
+    #[cfg(target_os = "linux")]
+    return Ok("libNETUSBCAM.so");
+    #[cfg(target_os = "windows")]
+    {
+        #[cfg(target_arch = "x86_64")]
+        return Ok("ICubeSDK64");
+        #[cfg(target_arch = "x86")]
+        return "ICubeSDK";
+    }
+
+    #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+    return Err(UnsupportedPlatformError);
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub struct UnsupportedPlatformError;
+
+impl std::fmt::Display for UnsupportedPlatformError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "Unsupported platform")
+    }
+}
+
+impl std::error::Error for UnsupportedPlatformError {}

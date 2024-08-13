@@ -10,3 +10,24 @@ See the `examples` directory for usage examples.
 ## Documentation
 
 See the official documentation shipped with the SDK.
+
+## Runtime and SDK
+
+Download from: <https://net-gmbh.com/en/machine-vision/products/cameras/usb2-icube/>
+
+Unpack the correct version and you will find:
+- driver
+- SDK
+- documentation
+
+## Linux
+
+To install the driver, use dpkg, for example:
+```bash
+dpkg --install netusbcam_1.39-1_amd64_libudev.deb
+```
+
+When loading the library, you may encounter and error telling that `libudev.so.0` is missing. To fix this, install the `libudev0` package:
+```bash
+sudo apt-get install libudev0
+```

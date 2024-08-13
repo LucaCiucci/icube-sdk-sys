@@ -10,8 +10,5 @@ repository = "https://github.com/LucaCiucci/icube-sdk-sys"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-
-[build-dependencies]
-bindgen = "0.69.2"
-cc = "1.0.83"
-dirs = "5.0.1"
+libloading = "0.8.5"
+log = "0.4.22"

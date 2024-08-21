@@ -1,4 +1,4 @@
-use icube_sdk_sys::{SDK};
+use icube_sdk_sys::SDK;
 
 
 fn main() {

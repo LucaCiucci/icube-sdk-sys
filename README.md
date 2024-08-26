@@ -31,3 +31,14 @@ When loading the library, you may encounter and error telling that `libudev.so.0
 ```bash
 sudo apt-get install libudev0
 ```
+
+### Troubleshooting
+
+You may encounter a permission error, this because `libNETUSBCAM*.so` uses `libusb` to access the device directly.  
+The easy way to fix this is to allow the current user to access the device (NETUSBCAM).
+
+Create `/etc/udev/rules.d/99-netusbcam.rules` with the following content:
+```plain
+SUBSYSTEM=="usb", ATTR{idVendor}=="152a", ATTR{idProduct}=="*", MODE="0666", GROUP="plugdev"
+```
+You may want to verify the `idVendor` and `idProduct` by running `lsusb`.

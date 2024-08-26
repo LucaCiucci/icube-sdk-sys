@@ -38,7 +38,12 @@ impl SDK {
 
 pub fn default_lib_name() -> Result<&'static str, UnsupportedPlatformError> {
     #[cfg(target_os = "linux")]
-    return Ok("libNETUSBCAM.so");
+    {
+        #[cfg(debug_assertions)]
+        return Ok("libNETUSBCAM_debug.so");
+        #[cfg(not(debug_assertions))]
+        return Ok("libNETUSBCAM.so");
+    }
     #[cfg(target_os = "windows")]
     {
         #[cfg(target_arch = "x86_64")]

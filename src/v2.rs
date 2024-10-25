@@ -313,7 +313,7 @@ decl_api! {
         
         fn SetDisplayMode(nCamIndex: c_int, nMode: c_int, property: DISP_PROPERTY) -> c_int;
 
-        fn GetVersion(nType: c_int, pVersion: *mut c_char) -> c_void;
+        //fn GetVersion(nType: c_int, pVersion: *mut c_char) -> c_void; sse https://github.com/LucaCiucci/icube-sdk-sys/issues/1
         fn GetFWVersion(nCamIndex: c_int, pVersion: *mut c_char) -> c_int;
         fn GetSerialNum(nCamIndex: c_int, pVersion: *mut c_char) -> c_int;
         fn GetFGPAVersion(nCamIndex: c_int, pVersion: *mut c_char) -> c_int;
@@ -361,8 +361,12 @@ impl API {
     ///
     /// This ffi were provided for the 2.0.x.x version of the SDK
     pub fn check_version(&self) -> bool {
-        let mut version = [0; 32];
-        unsafe { (self.GetVersion)(version.len() as _, version.as_mut_ptr() as *mut _) };
+        // This check is disabled since GetVersion is broken and crashes the program
+        // see https://github.com/LucaCiucci/icube-sdk-sys/issues/1
+
+        /*
+        let mut version = [0; 32 + 100];
+        unsafe { (self.GetVersion)((version.len() as i32 - 10) as _, version.as_mut_ptr() as *mut _) };
 
         let version = unsafe { CStr::from_ptr(version.as_ptr()) }.to_string_lossy();
 
@@ -370,6 +374,7 @@ impl API {
             log::error!("The version of the SDK is not 2.0.x.x: {}", version);
             return false;
         }
+        */
 
         true
     }

@@ -49,7 +49,7 @@ pub fn default_lib_name() -> Result<&'static str, UnsupportedPlatformError> {
         #[cfg(target_arch = "x86_64")]
         return Ok("ICubeSDK64");
         #[cfg(target_arch = "x86")]
-        return "ICubeSDK";
+        return Ok("ICubeSDK");
     }
 
     #[cfg(not(any(target_os = "linux", target_os = "windows")))]
